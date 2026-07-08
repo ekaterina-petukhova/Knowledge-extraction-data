@@ -1,0 +1,16 @@
+﻿period,category_final,n,period_total,share
+post_2022,East,14,158,0.08860759493670886
+post_2022,No_geo_no_person_in_title,41,158,0.25949367088607594
+post_2022,Russia,78,158,0.4936708860759494
+post_2022,Unknown,2,158,0.012658227848101266
+post_2022,West,23,158,0.14556962025316456
+pre_2022,East,16,202,0.07920792079207921
+pre_2022,No_geo_no_person_in_title,53,202,0.2623762376237624
+pre_2022,Russia,67,202,0.3316831683168317
+pre_2022,Unknown,10,202,0.04950495049504951
+pre_2022,West,56,202,0.27722772277227725
+transition_2022,East,2,40,0.05
+transition_2022,No_geo_no_person_in_title,5,40,0.125
+transition_2022,Russia,27,40,0.675
+transition_2022,Unknown,1,40,0.025
+transition_2022,West,5,40,0.125
