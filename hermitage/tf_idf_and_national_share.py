@@ -2,12 +2,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-INPUT_FILE = 'russkiy_muzei_classified_final.csv'
-TEXT_COL = 'description'
+INPUT_FILE = 'hermitage_categorized.csv'
+TEXT_COL = 'text_to_analyze'
 
 df = pd.read_csv(INPUT_FILE)
 df['year'] = pd.to_numeric(df['year'], errors='coerce')
 
+# Исключаем записи без реального текста (только обрывок футера сайта —
+# "Все права защищены. Использование изображений / О сайте") — иначе они
+# засоряют TF-IDF словами вроде "права", "сайте", "изображений" (ровно то,
+# что вылезло в топ на прошлом графике).
 JUNK_TEXT = 'Все права защищены Использование изображений / О сайте'
 df = df[df[TEXT_COL].astype(str).str.strip() != JUNK_TEXT].copy()
 
@@ -49,10 +53,10 @@ national_share_df = pd.DataFrame([
     },
 ])
 
-national_share_df.to_csv('russian_museum_national_share.csv', index=False)
+national_share_df.to_csv('hermitage_national_share.csv', index=False)
 print("=== National Component Share ===")
 print(national_share_df.to_string(index=False))
-print("Сохранено: russian_museum_national_share.csv\n")
+print("Сохранено: hermitage_national_share.csv\n")
 
 # --- график: National Component Share ---
 plt.style.use('seaborn-v0_8-whitegrid')
@@ -66,10 +70,10 @@ for bar, pct in zip(bars, [pct_before, pct_after]):
 
 ax.set_ylim(0, max(pct_before, pct_after) * 1.3)
 ax.set_ylabel('Share of Exhibitions (%)', fontsize=11)
-ax.set_title('National Component Share', fontsize=15, pad=16)
+ax.set_title('Hermitage: National Component Share', fontsize=15, pad=16)
 plt.tight_layout()
-plt.savefig('russian_museum_national_share.png', dpi=300, bbox_inches='tight')
-print("Сохранено: russian_museum_national_share.png\n")
+plt.savefig('hermitage_national_share.png', dpi=300, bbox_inches='tight')
+print("Сохранено: hermitage_national_share.png\n")
 
 
 # =====================================================================
@@ -146,8 +150,8 @@ def top_n(scores_dict, n=15):
     return sorted(scores_dict.items(), key=lambda x: x[1], reverse=True)[:n]
 
 
-before_scores = get_all_keyword_scores(before[TEXT_COL])
-after_scores = get_all_keyword_scores(after[TEXT_COL])
+before_scores = get_all_keyword_scores(before['text_to_analyze'])
+after_scores = get_all_keyword_scores(after['text_to_analyze'])
 
 top_before = top_n(before_scores, n=15)
 top_after = top_n(after_scores, n=15)
@@ -184,8 +188,8 @@ for w in main_keywords:
     rows.append({'period': 'after_2022', 'word': w, 'tfidf_avg_score': round(float(after_scores.get(w, 0)), 4)})
 
 keywords_df = pd.DataFrame(rows)
-keywords_df.to_csv('russian_museum_tfidf_keywords.csv', index=False)
-print("\nСохранено: russian_museum_tfidf_keywords.csv")
+keywords_df.to_csv('hermitage_tfidf_keywords_normalized.csv', index=False)
+print("\nСохранено: hermitage_tfidf_keywords_normalized.csv")
 print(keywords_df.to_string(index=False))
 
 # --- график: Top Keywords (TF-IDF Weight), сгруппированные столбцы ---
@@ -205,9 +209,9 @@ bars2 = ax.bar([i + width / 2 for i in x], pivot['after_2022'], width, label='Af
 ax.set_xticks(list(x))
 ax.set_xticklabels(pivot.index, rotation=0)
 ax.set_ylabel('Mean TF-IDF Weight per Document', fontsize=11)
-ax.set_title('Russian Museum: Top Keywords (Mean TF-IDF per Document), Before vs. After 2022', fontsize=15, pad=16)
+ax.set_title('Hermitage: Top Keywords (Mean TF-IDF per Document), Before vs. After 2022', fontsize=15, pad=16)
 ax.legend(fontsize=11)
 
 plt.tight_layout()
-plt.savefig('russian_museum_tfidf_keywords.png', dpi=300, bbox_inches='tight')
-print("\nСохранено: russian_museum_tfidf_keywords.png")
+plt.savefig('hermitage_tfidf_keywords_normalized.png', dpi=300, bbox_inches='tight')
+print("\nСохранено: hermitage_tfidf_keywords_normalized.png")
