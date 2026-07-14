@@ -2,7 +2,7 @@ import pandas as pd
 from transformers import pipeline
 
 # 1. Загрузка данных
-df_rm = pd.read_csv('exhibitions_full_archive_v2.csv')
+df_rm = pd.read_csv('russkiy muzei/russian_museum_exhibitions_2014_2026_updated_ordered.csv')
 
 # 2. Инициализация классификатора
 # Используем модель, которая лучше работает с логикой
@@ -29,7 +29,7 @@ def get_category(text):
 print(f"Начинаю классификацию {len(df_rm)} записей...")
 
 categories = []
-for i, text in enumerate(df_rm['text_to_analyze']):
+for i, text in enumerate(df_rm['description']):
     categories.append(get_category(text))
     if (i + 1) % 20 == 0:
         print(f"Обработано {i + 1} из {len(df_rm)}...")
