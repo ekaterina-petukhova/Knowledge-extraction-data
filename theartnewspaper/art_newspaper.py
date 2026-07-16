@@ -69,7 +69,6 @@ def normalize_article_url(href):
     if not href.startswith(BASE_URL):
         return None
 
-    # статьи TANR обычно лежат здесь
     if "/posts/" not in href:
         return None
 
@@ -101,7 +100,6 @@ def collect_articles_from_section_page(page_number):
         if len(text) < 15:
             continue
 
-        # оставляем только карточки раздела "Выставки"
         if "Выставки" not in text and "выстав" not in text.lower():
             continue
 
@@ -238,7 +236,6 @@ def main():
 
     all_links = []
 
-    # Можно увеличить до 100, если хочешь глубже в архив.
     for page_number in range(1, 81):
         items = collect_articles_from_section_page(page_number)
 

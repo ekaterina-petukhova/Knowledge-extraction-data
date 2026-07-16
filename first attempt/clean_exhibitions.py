@@ -4,18 +4,13 @@ def clean_description(text):
     if not isinstance(text, str):
         return text
     
-    # Мы ищем конец "мусорного" блока
-    # Оставляем всё, что идет после "Описание Фото"
     marker = "Описание Фото"
     
     if marker in text:
         return text.split(marker, 1)[1].strip()
-    
-    # Если маркера "Описание Фото" нет, 
-    # пробуем удалить хотя бы мусорный блок "КУПИТЬ БИЛЕТ"
+
     trash_start = "КУПИТЬ БИЛЕТ"
     if trash_start in text:
-        # Режем текст по последнему вхождению "КУПИТЬ БИЛЕТ"
         return text.rsplit(trash_start, 1)[1].strip()
         
     return text

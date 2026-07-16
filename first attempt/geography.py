@@ -7,21 +7,12 @@ from urllib.parse import quote
 from natasha import Segmenter, NewsEmbedding, NewsNERTagger, Doc
 import pymorphy3
 
-
-# ==========================================================
-# INPUT / OUTPUT
-# ==========================================================
-
 INPUT_FILE = "museum_exhibitions_combined.csv"
 
 OUTPUT_FILE = "exhibitions_geo_people_classified.csv"
 REVIEW_FILE = "exhibitions_manual_review.csv"
 SUMMARY_FILE = "exhibitions_category_summary.csv"
 
-
-# ==========================================================
-# WIKIPEDIA SETTINGS
-# ==========================================================
 
 WIKI_HEADERS = {
     "User-Agent": "MuseumExhibitionsResearch/1.0 (student research; contact: ekaterina.petukhova03@gmail.com)",
@@ -34,26 +25,11 @@ WIKI_SESSION.headers.update(WIKI_HEADERS)
 
 WIKI_CACHE = {}
 
-
-# ==========================================================
-# NATASHA NER SETTINGS
-# ==========================================================
-
 segmenter = Segmenter()
 emb = NewsEmbedding()
 ner_tagger = NewsNERTagger(emb)
 
-
-# ==========================================================
-# MORPHOLOGY SETTINGS
-# ==========================================================
-
 morph = pymorphy3.MorphAnalyzer()
-
-
-# ==========================================================
-# TEXT NORMALIZATION
-# ==========================================================
 
 def normalize(text):
     text = str(text or "").lower()
@@ -93,14 +69,7 @@ def remove_institutional_noise(text):
     return text
 
 
-# ==========================================================
-# GEO PATTERNS
-# Сначала ищем страны, города, регионы, культурные маркеры
-# ==========================================================
-
 GEO_PATTERNS = [
-
-    # ---------------- RUSSIA ----------------
 
     (
         r"\bросси[яийскуюае]+\b|\bрусск\w*\b|\bроссийск\w*\b",
@@ -130,8 +99,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- RUSSIA EXTRA ----------------
-
     (
         r"\bпушкин\w*\b|\bпушкинск\w*\b|"
         r"\bцветаев\w*\b|\bцветаевск\w*\b|"
@@ -145,7 +112,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- WEST GENERAL ----------------
 
     (
         r"\bзападноевроп\w*\b|\bзападн\w+ искусств\w*\b|"
@@ -155,7 +121,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- GREECE / ANTIQUITY ----------------
 
     (
         r"\bгрец\w*\b|\bгреческ\w*\b|\bэллад\w*\b|"
@@ -167,8 +132,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- FRANCE ----------------
-
     (
         r"\bфранци\w*\b|\bфранцуз\w*\b|\bпариж\w*\b|"
         r"\bмонпарнас\w*\b|\bверсал\w*\b|\bлувр\w*\b|"
@@ -178,7 +141,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- ITALY ----------------
 
     (
         r"\bитал\w*\b|\bрим\w*\b|\bвенеци\w*\b|"
@@ -191,8 +153,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- SPAIN / PORTUGAL ----------------
-
     (
         r"\bиспан\w*\b|\bиспания\w*\b|\bмадрид\w*\b|"
         r"\bбарселон\w*\b|\bкаталони\w*\b",
@@ -200,8 +160,6 @@ GEO_PATTERNS = [
         "West",
         "geo_title"
     ),
-
-    # ---------------- GERMANY ----------------
 
     (
         r"\bгермани\w*\b|\bнемец\w*\b|\bберлин\w*\b|"
@@ -211,16 +169,12 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- AUSTRIA ----------------
-
     (
         r"\bавстри\w*\b|\bвен[аеы]\b|\bальбертин\w*\b",
         "Austria",
         "West",
         "geo_title"
     ),
-
-    # ---------------- UNITED KINGDOM ----------------
 
     (
         r"\bангли\w*\b|\bбритан\w*\b|\bвеликобритани\w*\b|"
@@ -229,9 +183,6 @@ GEO_PATTERNS = [
         "West",
         "geo_title"
     ),
-
-    # ---------------- NETHERLANDS ----------------
-
     (
         r"\bнидерланд\w*\b|\bголланд\w*\b|\bамстердам\w*\b|"
         r"\bлейденск\w*\b",
@@ -240,7 +191,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- BELGIUM / FLANDERS ----------------
 
     (
         r"\bбельги\w*\b|\bфламанд\w*\b|\bбрюссел\w*\b",
@@ -249,7 +199,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- SWITZERLAND ----------------
 
     (
         r"\bшвейцари\w*\b|\bцюрих\w*\b|\bженев\w*\b",
@@ -258,7 +207,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- USA ----------------
 
     (
         r"\bамерик\w*\b|\bсша\b|\bнью[- ]йорк\w*\b|"
@@ -267,8 +215,6 @@ GEO_PATTERNS = [
         "West",
         "geo_title"
     ),
-
-    # ---------------- OTHER EUROPE ----------------
 
     (
         r"\bпольш\w*\b|\bваршав\w*\b|\bчех\w*\b|\bпраг\w*\b|"
@@ -280,8 +226,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- EAST GENERAL ----------------
-
     (
         r"\bвосточн\w*\b|\bдальн\w+ восток\w*\b",
         "East",
@@ -289,7 +233,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- JAPAN ----------------
 
     (
         r"\bяпони\w*\b|\bяпон\w*\b|\bтокио\w*\b|"
@@ -299,8 +242,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- CHINA ----------------
-
     (
         r"\bкита\w*\b|\bкитай\w*\b|\bпекин\w*\b|"
         r"\bшанха\w*\b|\bхань\b|\bмин\b|\bтан\b|\bхубэй\w*\b",
@@ -309,7 +250,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- KOREA ----------------
 
     (
         r"\bкоре\w*\b|\bсеул\w*\b",
@@ -318,7 +258,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- INDIA ----------------
 
     (
         r"\bинд\w*\b|\bдели\b|\bбомбей\b",
@@ -327,7 +266,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- IRAN / PERSIA ----------------
 
     (
         r"\bиран\w*\b|\bперси\w*\b|\bтегеран\w*\b",
@@ -335,8 +273,6 @@ GEO_PATTERNS = [
         "East",
         "geo_title"
     ),
-
-    # ---------------- CENTRAL ASIA ----------------
 
     (
         r"\bказахстан\w*\b|\bузбекистан\w*\b|\bсамарканд\w*\b|"
@@ -347,8 +283,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- OTHER ASIA ----------------
-
     (
         r"\bтибет\w*\b|\bнепал\w*\b|\bтаиланд\w*\b|"
         r"\bвьетнам\w*\b|\bкамбодж\w*\b|\bлаос\w*\b|"
@@ -358,7 +292,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- ANCIENT EGYPT ----------------
 
     (
         r"\bегип\w*\b|\bегипетск\w*\b|\bдревнеегип\w*\b|\bмумии\b|"
@@ -370,7 +303,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- ASSYRIA / MESOPOTAMIA ----------------
 
     (
         r"\bашшур\w*\b|\bашшурнацирапал\w*\b|\bассири\w*\b|"
@@ -381,7 +313,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- ANCIENT EAST / CAUCASUS ----------------
 
     (
         r"\bвизанти\w*\b|\bурарту\w*\b|\bармени\w*\b|"
@@ -401,19 +332,12 @@ GEO_PATTERNS = [
     ),
 ]
 
-
-# ==========================================================
-# WIKIPEDIA CLASSIFICATION DICTIONARIES
-# ==========================================================
-
 COUNTRY_TO_CATEGORY = {
-    # Russia
     "россия": "Russia",
     "российская империя": "Russia",
     "ссср": "Russia",
     "советский союз": "Russia",
 
-    # West
     "франция": "West",
     "италия": "West",
     "испания": "West",
@@ -439,7 +363,6 @@ COUNTRY_TO_CATEGORY = {
     "ирландия": "West",
     "греция": "West",
 
-    # East
     "япония": "East",
     "китай": "East",
     "корея": "East",
@@ -461,7 +384,6 @@ COUNTRY_TO_CATEGORY = {
 
 
 NATIONALITY_TO_CATEGORY = {
-    # Russia
     "русский": "Russia",
     "русская": "Russia",
     "российский": "Russia",
@@ -469,7 +391,6 @@ NATIONALITY_TO_CATEGORY = {
     "советский": "Russia",
     "советская": "Russia",
 
-    # West
     "французский": "West",
     "французская": "West",
     "итальянский": "West",
@@ -517,7 +438,7 @@ NATIONALITY_TO_CATEGORY = {
     "греческий": "West",
     "греческая": "West",
 
-    # East
+
     "японский": "East",
     "японская": "East",
     "китайский": "East",
@@ -555,10 +476,6 @@ NATIONALITY_TO_CATEGORY = {
 }
 
 
-# ==========================================================
-# GEOGRAPHY DETECTION
-# ==========================================================
-
 def find_geo(title):
     clean_title = remove_institutional_noise(title)
     text = normalize(clean_title)
@@ -579,11 +496,6 @@ def find_geo(title):
 
     return matches
 
-
-# ==========================================================
-# PERSON EXTRACTION FROM TITLE WITH NATASHA
-# ==========================================================
-
 def extract_possible_people_from_title(title):
     """
     Извлекает имена людей из названия выставки через Natasha NER.
@@ -594,7 +506,6 @@ def extract_possible_people_from_title(title):
 
     clean_title = remove_institutional_noise(title)
 
-    # Удаляем инициалы типа А.С., А.Н., К.А.
     clean_title = re.sub(r"\b[А-ЯЁ]\.\s*[А-ЯЁ]\.", " ", clean_title)
     clean_title = re.sub(r"\b[А-ЯЁ]\.", " ", clean_title)
 
@@ -615,14 +526,8 @@ def extract_possible_people_from_title(title):
 
     return people
 
-
-# ==========================================================
-# MANUAL PERSON OVERRIDES
-# Для редких музейных персон, которых Wikipedia/API может не найти
-# ==========================================================
-
 MANUAL_PERSON_OVERRIDES = {
-    # Russia
+
     "беатриса сандомирская": {
         "country": "Russia",
         "category": "Russia",
@@ -684,12 +589,6 @@ MANUAL_PERSON_OVERRIDES = {
 
 
 def normalize_person_name(person_name):
-    """
-    Приводит имя к нормальной форме:
-    'Ефима Харабета' -> 'ефим харабет'
-    'Сергея Романовича' -> 'сергей романович'
-    'Ивана Похитонова' -> 'иван похитонов'
-    """
 
     text = str(person_name or "").lower()
     text = text.replace("ё", "е")
@@ -705,16 +604,7 @@ def normalize_person_name(person_name):
     return " ".join(normalized_words)
 
 
-# ==========================================================
-# WIKIPEDIA API FUNCTIONS
-# ==========================================================
-
 def wiki_search_ru(query):
-    """
-    Ищет страницу в русской Википедии.
-    Если Wikipedia отвечает 403 или зависает, возвращает None.
-    """
-
     query = str(query).strip()
 
     if not query:
@@ -766,11 +656,6 @@ def wiki_search_ru(query):
 
 
 def wiki_get_page_text_ru(title):
-    """
-    Загружает текст страницы из русской Википедии.
-    Если Wikipedia отвечает 403 или зависает, возвращает пустую строку.
-    """
-
     title = str(title).strip()
 
     if not title:
@@ -882,7 +767,6 @@ def classify_person_by_wikipedia(person_name):
                 "wiki_url": "https://ru.wikipedia.org/wiki/" + page_title.replace(" ", "_")
             }
 
-    # 2. Проверяем страны
     for country, category in COUNTRY_TO_CATEGORY.items():
         country_norm = country.replace("ё", "е")
 
@@ -936,21 +820,7 @@ def find_person_via_wikipedia(title):
 
     return matches
 
-
-# ==========================================================
-# FINAL CLASSIFICATION
-# ==========================================================
-
 def choose_classification(matches):
-    """
-    Выбирает итоговую классификацию.
-
-    Логика:
-    - если нет совпадений -> No_geo_no_person_in_title
-    - если есть West/East и Russia одновременно -> берем иностранный маркер
-    - если есть только Russia -> Russia
-    - если есть West и East одновременно -> Mixed_East_West
-    """
 
     if not matches:
         return {
@@ -1062,11 +932,6 @@ def choose_classification(matches):
         "wiki_url": wiki_url
     }
 
-
-# ==========================================================
-# MAIN
-# ==========================================================
-
 df = pd.read_csv(INPUT_FILE)
 
 rows = []
@@ -1077,10 +942,8 @@ for i, row in df.iterrows():
 
     print(f"\n{i + 1}/{len(df)}: {title}")
 
-    # 1. Сначала ищем географию в заголовке
     geo_matches = find_geo(title)
 
-    # 2. Если география не найдена, ищем людей через Natasha + manual overrides + Wikipedia
     if geo_matches:
         person_matches = []
     else:
@@ -1093,8 +956,6 @@ for i, row in df.iterrows():
     new_row = row.to_dict()
     new_row.update(classification)
 
-    # Ручная проверка нужна только если Natasha/Wikipedia нашла человека,
-    # но не смогла определить страну/категорию.
     new_row["wikipedia_check_needed"] = (
         new_row["category_final"] == "Unknown"
     )
@@ -1112,21 +973,12 @@ for i, row in df.iterrows():
 
 out = pd.DataFrame(rows)
 
-
-# ==========================================================
-# SAVE FULL CLASSIFIED DATA
-# ==========================================================
-
 out.to_csv(
     OUTPUT_FILE,
     index=False,
     encoding="utf-8-sig"
 )
 
-
-# ==========================================================
-# SAVE MANUAL REVIEW TABLE
-# ==========================================================
 
 review = out[
     out["category_final"] == "Unknown"
@@ -1157,11 +1009,6 @@ review[existing_review_columns].to_csv(
     encoding="utf-8-sig"
 )
 
-
-# ==========================================================
-# SAVE SUMMARY TABLE
-# ==========================================================
-
 summary = (
     out
     .groupby(["period", "category_final"])
@@ -1177,12 +1024,6 @@ summary.to_csv(
     index=False,
     encoding="utf-8-sig"
 )
-
-
-# ==========================================================
-# SAVE ANALYSIS-READY SUMMARY
-# Без No_geo_no_person_in_title и Unknown
-# ==========================================================
 
 analysis = out[
     out["category_final"].isin(["Russia", "West", "East", "Mixed_East_West"])
@@ -1205,11 +1046,6 @@ analysis_summary.to_csv(
     index=False,
     encoding="utf-8-sig"
 )
-
-
-# ==========================================================
-# PRINT RESULTS
-# ==========================================================
 
 print("\nГотово!")
 print("Saved:", OUTPUT_FILE)

@@ -27,7 +27,6 @@ def main():
     print("Загрузка данных...")
     df = pd.read_csv(input_file)
     
-    # Берем только первые 20 строк для теста
     df_test = df.head(20).copy()
     
     cols = ['museum', 'title', 'date_range', 'year', 'url', 'text_to_analyze', 'category']
@@ -38,11 +37,9 @@ def main():
     for index, row in df_test.iterrows():
         print(f"[{index + 1}/20] Обрабатываю выставку: {row['title']}...")
         
-        # Получаем резюме
         summary = get_local_summary(row['text_to_analyze'])
         df_test.at[index, 'text_to_analyze'] = summary
         
-        # Пауза, чтобы компьютер успел «отдышаться»
         time.sleep(1) 
 
     df_test.to_csv(output_file, index=False)

@@ -15,11 +15,6 @@ after = df[df['year'] >= 2022]
 print(f"Всего записей: {len(df)}")
 print(f"До 2022: {len(before)}  |  После 2022: {len(after)}\n")
 
-
-# =====================================================================
-# 1. РАСПРЕДЕЛЕНИЕ ПО ГОДАМ
-# =====================================================================
-
 distribution = df['year'].value_counts().sort_index()
 print("=== Распределение по годам ===")
 print(distribution)
@@ -29,7 +24,6 @@ dist_df.columns = ['year', 'count']
 dist_df.to_csv('pushkin_year_distribution.csv', index=False)
 print("\nСохранено: pushkin_year_distribution.csv\n")
 
-# график по годам, с разбивкой по категориям (в штуках, как в plot_results_fixed.py)
 pivot = df.groupby(['year', 'category']).size().unstack(fill_value=0)
 categories_order = ["восточное искусство", "западное искусство", "национальное российское искусство"]
 pivot = pivot.reindex(columns=categories_order, fill_value=0)
@@ -53,14 +47,6 @@ ax.legend(title='Category', fontsize=11, loc='upper left', bbox_to_anchor=(1.02,
 plt.tight_layout()
 plt.savefig('pushkin_trends.png', dpi=300, bbox_inches='tight')
 print("Сохранено: pushkin_trends.png\n")
-
-
-
-
-
-# =====================================================================
-# 2. NATIONAL COMPONENT SHARE (до/после 2022, по колонке category)
-# =====================================================================
 
 NATIONAL_LABEL = "национальное российское искусство"
 

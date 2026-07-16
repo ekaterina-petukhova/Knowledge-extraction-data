@@ -16,11 +16,6 @@ OUTPUT_ENTITIES = "entities_extracted.csv"
 OUTPUT_CLASSIFIED = "entities_classified_wikidata.csv"
 OUTPUT_EXHIBITIONS = "exhibitions_with_geo_orientation.csv"
 
-
-# -------------------------
-# Географические категории
-# -------------------------
-
 WEST_COUNTRIES = {
     "France", "Italy", "Germany", "United Kingdom", "United States of America",
     "Spain", "Portugal", "Netherlands", "Belgium", "Austria", "Switzerland",
@@ -38,11 +33,6 @@ EAST_COUNTRIES = {
 RUSSIA_NAMES = {
     "Russia", "Russian Empire", "Soviet Union", "Russian Federation"
 }
-
-
-# -------------------------
-# NER Natasha
-# -------------------------
 
 segmenter = Segmenter()
 emb = NewsEmbedding()
@@ -78,11 +68,6 @@ def extract_entities_natasha(text):
         })
 
     return entities
-
-
-# -------------------------
-# Wikidata API
-# -------------------------
 
 def wikidata_search(entity):
     """
@@ -225,7 +210,6 @@ def classify_entity_with_wikidata(entity):
 
     claims = wikidata_get_claims(qid)
 
-    # P17 country, P27 citizenship, P495 country of origin, P131 location
     country_qids = extract_qids_from_claims(claims, ["P17", "P27", "P495"])
 
     countries = []
@@ -258,10 +242,6 @@ def classify_entity_with_wikidata(entity):
         "geo_orientation": orientation
     }
 
-
-# -------------------------
-# Exhibition aggregation
-# -------------------------
 
 def classify_exhibition(entity_rows):
     """

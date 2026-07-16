@@ -3,8 +3,6 @@ import pandas as pd
 df = pd.read_csv('final_analysis_cleaned.csv')
 df['year'] = pd.to_numeric(df['year'], errors='coerce')
 
-# Регулярка: ищем 'рус' или 'росс' (case=False игнорирует регистр)
-# Это поймает: русский, русская, российское, России, russia, russian и т.д.
 pattern = r'рус|росс|russ'
 
 before_2022 = df[(df['year'] < 2022) & (df['text_to_analyze'].str.contains(pattern, case=False, na=False))]

@@ -22,7 +22,6 @@ def get_local_summary(text):
         return text
 
 def main():
-    # Файл, который мы читаем и куда записываем итог
     file_path = 'final_analysis_cleaned.csv'
     temp_file = 'final_analysis_processing.csv'
     
@@ -34,22 +33,16 @@ def main():
     
     for index, row in df.iterrows():
         print(f"[{index + 1}/{total}] Обрабатываю: {row['title'][:30]}...")
-        
-        # Обработка
         summary = get_local_summary(row['text_to_analyze'])
         df.at[index, 'text_to_analyze'] = summary
-        
-        # Сохраняем промежуточный результат каждые 5 строк, 
-        # чтобы в случае вылета скрипта данные не пропали
+     
         if (index + 1) % 5 == 0:
             df.to_csv(temp_file, index=False)
         
         time.sleep(1) 
 
-    # Финальное сохранение поверх исходного файла
     df.to_csv(file_path, index=False)
     
-    # Удаляем временный файл
     if os.path.exists(temp_file):
         os.remove(temp_file)
         

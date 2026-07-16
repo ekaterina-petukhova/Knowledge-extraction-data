@@ -15,13 +15,6 @@ after = df[df['year'] >= 2022]
 print(f"Всего записей: {len(df)}")
 print(f"До 2022: {len(before)}  |  После 2022: {len(after)}\n")
 
-
-# =====================================================================
-# 1. NATIONAL COMPONENT (в штуках, не в процентах)
-#    Доля записей с category == "национальное российское искусство"
-#    в каждой из двух выборок (year<2022 vs year>=2022)
-# =====================================================================
-
 NATIONAL_LABEL = "национальное российское искусство"
 
 n_before_total = len(before)
@@ -52,7 +45,6 @@ print("=== National Component ===")
 print(national_share_df.to_string(index=False))
 print("Сохранено: tretyakov_national_share.csv\n")
 
-# --- график: National Component (штуки, не проценты) ---
 plt.style.use('seaborn-v0_8-whitegrid')
 fig, ax = plt.subplots(figsize=(6, 7))
 colors_share = ['#2F6663', '#A06060']
@@ -70,13 +62,6 @@ plt.tight_layout()
 plt.savefig('tretyakov_national_share.png', dpi=300, bbox_inches='tight')
 print("Сохранено: tretyakov_national_share.png\n")
 
-
-# =====================================================================
-# 2. TOP TF-IDF KEYWORDS
-#    Нормализованный TF-IDF (средний вес на документ) отдельно для
-#    before/after, топ-слова по каждому периоду объединяются в единый
-#    список 10 главных слов, вес каждого берём в обеих выборках.
-# =====================================================================
 
 RUSSIAN_STOPWORDS = [
     "и","в","во","не","что","он","на","я","с","со","как","а","то","все","она",

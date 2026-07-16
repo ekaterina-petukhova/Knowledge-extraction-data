@@ -87,8 +87,6 @@ def is_event_link(href):
     if any(bad in href for bad in bad_parts):
         return False
 
-    # У Artguide события чаще всего лежат отдельными короткими URL.
-    # Берём ссылки, которые не похожи на меню/разделы.
     return True
 
 
@@ -105,15 +103,12 @@ def collect_events_from_page(page_number):
 
     page_text = clean_text(soup.get_text(" "))
 
-    # Берём только часть страницы после фильтров событий.
-    # До этого на странице могут быть новости, меню и футер.
     marker = "Все Закрываются Открываются Эти выходные Прошедшие"
     if marker in page_text:
         events_text = page_text.split(marker, 1)[1]
     else:
         events_text = page_text
 
-    # Разбиваем по датам формата 06.03-06.06.2026
     date_pattern = r"\d{2}\.\d{2}\s*[—–-]\s*\d{2}\.\d{2}\.\d{4}"
     chunks = re.split(f"({date_pattern})", events_text)
 
@@ -126,19 +121,13 @@ def collect_events_from_page(page_number):
         if not chunk:
             continue
 
-        # Обычно после даты идёт:
-        # название выставки / площадка / Выставки
         parts = chunk.split(" Выставки ")
 
         before_type = parts[0]
         tokens = before_type.split(" ")
 
-        # Это грубый способ, но для Artguide работает как первичный сбор:
-        # название и площадку потом можно поправить вручную/допарсингом страницы.
         title = None
         venue = None
-
-        # Берём до ближайшего длинного разделителя/служебных слов
         stop_words = [
             "Лекции",
             "Аукционы",
@@ -153,8 +142,7 @@ def collect_events_from_page(page_number):
             if stop in before_type:
                 before_type = before_type.split(stop)[0]
 
-        # В тексте карточки чаще всего сначала название, потом площадка.
-        # Поэтому оставляем весь блок как raw_text, а ниже парсим детальную страницу.
+
         year = extract_year_from_text(date_range)
         period = assign_period(year)
 
@@ -198,7 +186,6 @@ def collect_links_from_page(page_number):
         if not text:
             continue
 
-        # Отсекаем очевидное меню
         menu_words = [
             "Новости", "Открытия", "Практика", "Процесс", "Теория",
             "События", "Адреса", "Арт-сообщество", "Об Артгиде",
@@ -279,8 +266,6 @@ def main():
     all_rows = []
     all_links = []
 
-    # Сначала попробуем 20 страниц.
-    # Если будет мало — увеличим до 50.
     for page_number in range(1, 21):
         rows = collect_events_from_page(page_number)
         links = collect_links_from_page(page_number)

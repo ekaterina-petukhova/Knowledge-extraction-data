@@ -119,7 +119,6 @@ def collect_exhibitions_from_archive_page(page_number):
 
     for index, item in enumerate(card_items, start=1):
         try:
-            # 1. Название выставки (парсим в начале)
             title_tag = item.find(class_="event-title-name") or item.find("h3")
             title = clean_text(title_tag.get_text()) if title_tag else None
             if not title:
@@ -128,14 +127,12 @@ def collect_exhibitions_from_archive_page(page_number):
             if not title:
                 raise ValueError("Не удалось извлечь название выставки")
 
-            # 2. Ссылка на выставку (с логированием отсутствия, но без падения)
             link_tag = item.find("a", href=True)
             if link_tag:
                 href = link_tag.get("href")
                 exhibition_url = urljoin(BASE_URL, href).split("?")[0].split("#")[0].rstrip("/")
             else:
                 exhibition_url = None
-                # Принудительно логируем карточку без ссылки в CSV для ошибок
                 item_html = str(item)[:500] + "..." if item else "None"
                 log_error_to_csv(
                     EXHIBITION_ERRORS_FILE,
@@ -149,24 +146,20 @@ def collect_exhibitions_from_archive_page(page_number):
                 )
                 print(f"   [!] Карточка #{index} на стр. {page_number} ('{title}') не имеет ссылки. Записано в лог ошибок.")
 
-            # 3. Диапазон дат
             date_tag = item.find(class_="event-date")
             if not date_tag:
                 raise ValueError("Не найден контейнер даты '.event-date'")
 
             date_range = clean_text(date_tag.get_text(" "))
 
-            # Вычисляем года для фильтрации / проставления периода
             years = extract_years_from_text_or_ru(date_range)
             period, year = get_period_from_years(years)
 
-            # 4. Описание (краткий анонс карточки)
             desc_tag = item.find(class_="event-about-text") or item.find(
                 class_="paragraph"
             )
             description = clean_text(desc_tag.get_text()) if desc_tag else ""
 
-            # 5. Место проведения (Дворец / Филиал)
             place_tag = item.find("a", class_="building")
             place = (
                 clean_text(place_tag.get_text())
@@ -188,7 +181,6 @@ def collect_exhibitions_from_archive_page(page_number):
             )
 
         except Exception as e:
-            # Сюда скрипт попадет только при критических ошибках (например, если нет названия или блока дат)
             error_msg = f"Критическая ошибка парсинга карточки #{index} на странице {page_number}: {e}"
             print(error_msg)
             item_html = str(item)[:500] + "..." if item else "None"
@@ -203,7 +195,6 @@ def collect_exhibitions_from_archive_page(page_number):
                 },
             )
 
-    # Локальное удаление дубликатов на странице
     unique = {}
     for row in rows:
         key = row["url"] if row["url"] else f"no_url_{row['title']}"
@@ -242,7 +233,6 @@ def main():
         print("\n[!] Данные не были собраны. Проверьте файлы ошибок.")
         return
 
-    # Финальная очистка от дубликатов по комбинации названия и URL
     df = df.drop_duplicates(subset=["title", "url"]).reset_index(drop=True)
 
     df = df[

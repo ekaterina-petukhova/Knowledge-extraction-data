@@ -1,7 +1,5 @@
 import pandas as pd
 from transformers import pipeline
-
-# 1. Загрузка данных
 print("Загрузка и объединение данных...")
 df_tretyakov = pd.read_csv('tretyakov_exhibitions_2014_2026.csv')
 df_pushkin = pd.read_csv('pushkin_exhibitions_raw.csv')
@@ -12,19 +10,15 @@ df_pushkin = df_pushkin.rename(columns={'raw_text': 'text_to_analyze'})
 df_combined = pd.concat([df_tretyakov, df_pushkin], ignore_index=True)
 print(f"Объединено {len(df_combined)} записей.")
 
-# 2. Инициализация классификатора
 print("Инициализация модели (это может занять время)...")
 classifier = pipeline("zero-shot-classification", model="MoritzLaurer/mDeBERTa-v3-base-mnli-xnli")
 labels = ["западное искусство", "восточное искусство", "национальное российское искусство"]
 
-# 3. Классификация
 print("Начинаю анализ содержания выставок...")
 def get_category(text):
-    text = str(text)[:512]  # берем первые 512 символов
+    text = str(text)[:512] 
     result = classifier(text, labels)
     return result['labels'][0]
-
-# Добавляем прогресс-бар (простая печать)
 categories = []
 for i, row in df_combined.iterrows():
     if i % 10 == 0:
@@ -33,7 +27,6 @@ for i, row in df_combined.iterrows():
 
 df_combined['category'] = categories
 
-# 4. Сохранение
 df_combined.to_csv('final_analysis_results.csv', index=False)
 print("Анализ завершен! Результаты сохранены в 'final_analysis_results.csv'.")
 

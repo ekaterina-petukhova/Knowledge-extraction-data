@@ -17,13 +17,6 @@ after = df[df['year'] >= 2022]
 print(f"Всего записей: {len(df)}")
 print(f"До 2022: {len(before)}  |  После 2022: {len(after)}\n")
 
-
-# =====================================================================
-# 1. NATIONAL COMPONENT SHARE
-#    Доля записей с category == "национальное российское искусство"
-#    в каждой из двух выборок (year<2022 vs year>=2022)
-# =====================================================================
-
 NATIONAL_LABEL = "национальное российское искусство"
 
 n_before_total = len(before)
@@ -54,7 +47,6 @@ print("=== National Component Share ===")
 print(national_share_df.to_string(index=False))
 print("Сохранено: russian_museum_national_share.csv\n")
 
-# --- график: National Component Share ---
 plt.style.use('seaborn-v0_8-whitegrid')
 fig, ax = plt.subplots(figsize=(6, 7))
 colors_share = ['#2F6663', '#A06060']
@@ -71,13 +63,6 @@ plt.tight_layout()
 plt.savefig('russian_museum_national_share.png', dpi=300, bbox_inches='tight')
 print("Сохранено: russian_museum_national_share.png\n")
 
-
-# =====================================================================
-# 2. TOP TF-IDF KEYWORDS
-#    Считаем нормализованный TF-IDF (средний вес на документ) отдельно для before/after, находим топ-слова
-#    по каждому периоду, объединяем в единый список 8-10 главных слов,
-#    затем считаем вес (tfidf_score) КАЖДОГО из этих слов в ОБЕИХ выборках
-# =====================================================================
 
 RUSSIAN_STOPWORDS = [
     "и","в","во","не","что","он","на","я","с","со","как","а","то","все","она",
@@ -159,8 +144,6 @@ print("\n--- Топ слов ПОСЛЕ 2022 (для отбора) ---")
 for w, s in top_after:
     print(f"{w}: {s:.4f}")
 
-# Выбираем 8-10 главных слов: объединяем топ-слова обоих периодов
-# по сумме их веса в before+after, берём самые значимые
 all_candidate_words = set(dict(top_before)) | set(dict(top_after))
 
 combined_scores = {
@@ -174,9 +157,6 @@ main_keywords = [w for w, _ in sorted(combined_scores.items(), key=lambda x: x[1
 print(f"\n=== Выбранные {TOP_N_KEYWORDS} главных ключевых слов ===")
 print(main_keywords)
 
-# Вес каждого из этих слов в каждой выборке берём из уже посчитанных
-# полнокорпусных TF-IDF словарей (before_scores / after_scores) —
-# так веса остаются сопоставимы и посчитаны в одинаковой системе координат.
 rows = []
 for w in main_keywords:
     rows.append({'period': 'before_2022', 'word': w, 'tfidf_avg_score': round(float(before_scores.get(w, 0)), 4)})
@@ -188,7 +168,6 @@ keywords_df.to_csv('russian_museum_tfidf_keywords.csv', index=False)
 print("\nСохранено: russian_museum_tfidf_keywords.csv")
 print(keywords_df.to_string(index=False))
 
-# --- график: Top Keywords (TF-IDF Weight), сгруппированные столбцы ---
 pivot = keywords_df.pivot(index='word', columns='period', values='tfidf_avg_score')
 # сортируем по убыванию суммарного веса, чтобы самые весомые слова были слева
 pivot['_sort'] = pivot['before_2022'] + pivot['after_2022']

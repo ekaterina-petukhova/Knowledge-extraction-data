@@ -16,7 +16,6 @@ SECTION = "shows"
 OUTPUT_FILE = "art_newspaper_exhibitions_2014_2026.csv"
 PAGE_ERRORS_FILE = "art_newspaper_page_errors.csv"
 
-# page=1 — самые свежие материалы, page=265 — 
 START_PAGE = 1
 END_PAGE = 264
 
@@ -88,11 +87,6 @@ def collect_exhibitions_from_archive_page(page_number):
 
     rows = []
 
-    # Карточки статей — <a class="postPreviewsItem" href="..." title="...">
-    # ВАЖНО: не полагаемся на дату внутри URL (как в первой версии скрипта) —
-    # у старых статей (примерно до 2018 года) ссылки вида /posts/85/, /posts/6449/
-    # (просто числовой id, без даты), а не /posts/20260702-ahvx/. Дату вместо
-    # этого берём из отдельного блока .postPreviewsItemDate внутри карточки.
     card_items = soup.find_all("a", class_="postPreviewsItem", href=True)
 
     for item in card_items:
@@ -127,7 +121,7 @@ def collect_exhibitions_from_archive_page(page_number):
             rows.append(
                 {
                     "museum": "The Art Newspaper Russia",
-                    "place": section,  # рубрика ("Выставки", "Крупным планом" и т.п.)
+                    "place": section,  
                     "title": title,
                     "date_range": date_range,
                     "year": year,
@@ -145,8 +139,6 @@ def collect_exhibitions_from_archive_page(page_number):
                 ["page_number", "error", "html_snippet"],
                 {"page_number": page_number, "error": str(e), "html_snippet": item_html},
             )
-
-    # Локальное удаление дубликатов на странице (по url)
     unique = {}
     for row in rows:
         key = row["url"] if row["url"] else f"no_url_{row['title']}"
@@ -173,10 +165,10 @@ def main():
         print("\n[!] Данные не были собраны. Проверьте файл ошибок.")
         return
 
-    # Финальная очистка от дубликатов по url
+
     df = df.drop_duplicates(subset=["url"]).reset_index(drop=True)
 
-    # Оставляем только период 2014-2026, как в остальных скраперах проекта
+
     df = df[df["period"] != "outside_scope"]
 
     df = df[
@@ -192,7 +184,6 @@ def main():
         ]
     ]
 
-    # Сортировка по году
     df = df.sort_values(by="year", ascending=True).reset_index(drop=True)
 
     df.to_csv(OUTPUT_FILE, index=False, encoding="utf-8-sig")

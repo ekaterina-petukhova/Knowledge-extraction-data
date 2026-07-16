@@ -34,16 +34,7 @@ def assign_period(year):
 
 
 def collect_links_on_current_page(page):
-    """
-    Собирает ссылки на выставки с текущей страницы архива.
-    """
-    links = page.locator("a").evaluate_all(
-        """
-        elements => elements.map(a => ({
-            text: a.innerText,
-            href: a.href
-        }))
-        """
+    links = page.locator("a").evaluate_all("elements => elements.map(el => ({ href: el.href, text: el.innerText }))"    
     )
 
     items = []
@@ -63,10 +54,6 @@ def collect_links_on_current_page(page):
 
 
 def click_pagination_button(page, page_number):
-    """
-    Нажимает кнопку пагинации с конкретным номером.
-    Например: button.pagination-btn с текстом '2'.
-    """
     selector = f"button.pagination-btn:text-is('{page_number}')"
 
     button = page.locator(selector)
@@ -100,7 +87,6 @@ def collect_all_archive_links():
         page.goto(ARCHIVE_URL, wait_until="domcontentloaded", timeout=90000)
         page.wait_for_timeout(5000)
 
-        # Закрываем cookie banner, если есть
         for text in ["Соглашаюсь", "Принять", "ОК", "OK"]:
             try:
                 btn = page.locator(f"text={text}")
@@ -111,15 +97,11 @@ def collect_all_archive_links():
                     break
             except Exception:
                 pass
-
-        # Собираем страницу 1
         print("\nСобираю страницу 1")
         items = collect_links_on_current_page(page)
         print("Найдено ссылок на странице 1:", len(items))
         all_items.extend(items)
 
-        # Идем по страницам 2–18
-        # Если у тебя реально 18 страниц, оставляем 19.
         for page_number in range(2, 19):
             print(f"\nПерехожу на страницу {page_number}")
 
@@ -147,9 +129,7 @@ def collect_all_archive_links():
 
 
 def parse_exhibition_page(page, url):
-    """
-    Парсит отдельную страницу выставки.
-    """
+    
     try:
         page.goto(url, wait_until="networkidle", timeout=90000)
         page.wait_for_timeout(3000)
@@ -231,7 +211,6 @@ def main():
         print("Данные выставок не собраны.")
         return
 
-    # Оставляем только нужный период 2014–2026
     df = df[df["period"] != "outside_scope"]
 
     df.to_csv("tretyakov_exhibitions_2014_2026.csv", index=False, encoding="utf-8-sig")

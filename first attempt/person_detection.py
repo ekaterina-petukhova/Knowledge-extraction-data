@@ -2,20 +2,11 @@ import pandas as pd
 import re
 from urllib.parse import quote
 
-# ==========================================================
-# INPUT / OUTPUT
-# ==========================================================
-
 INPUT_FILE = "museum_exhibitions_combined.csv"
 
 OUTPUT_FILE = "exhibitions_geo_people_classified.csv"
 REVIEW_FILE = "exhibitions_manual_review.csv"
 SUMMARY_FILE = "exhibitions_category_summary.csv"
-
-
-# ==========================================================
-# TEXT NORMALIZATION
-# ==========================================================
 
 def normalize(text):
     """
@@ -39,15 +30,8 @@ def normalize(text):
 def compile_regex(pattern):
     return re.compile(pattern, re.IGNORECASE | re.UNICODE)
 
-
-# ==========================================================
-# GEO PATTERNS
-# Сначала ищем страны, города, регионы, культурные маркеры
-# ==========================================================
-
 GEO_PATTERNS = [
 
-    # ---------------- RUSSIA ----------------
 
     (
         r"\bросси[яийскуюае]+\b|\bрусск\w*\b|\bроссийск\w*\b",
@@ -75,8 +59,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- WEST GENERAL ----------------
-
     (
         r"\bзападноевроп\w*\b|\bзападн\w+ искусств\w*\b|"
         r"\bевропейск\w*\b|\bевроп\w*\b",
@@ -85,7 +67,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- FRANCE ----------------
 
     (
         r"\bфранци\w*\b|\bфранцуз\w*\b|\bпариж\w*\b|"
@@ -95,8 +76,6 @@ GEO_PATTERNS = [
         "West",
         "geo_title"
     ),
-
-    # ---------------- ITALY ----------------
 
     (
         r"\bитал\w*\b|\bрим\w*\b|\bвенеци\w*\b|"
@@ -108,7 +87,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- SPAIN / PORTUGAL ----------------
 
     (
         r"\bиспан\w*\b|\bиспания\w*\b|\bмадрид\w*\b|"
@@ -118,8 +96,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- GERMANY ----------------
-
     (
         r"\bгермани\w*\b|\bнемец\w*\b|\bберлин\w*\b|"
         r"\bмюнхен\w*\b|\bдрезден\w*\b|\bпотсдам\w*\b",
@@ -128,7 +104,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- AUSTRIA ----------------
 
     (
         r"\bавстри\w*\b|\bвен[аеы]\b|\bальбертин\w*\b",
@@ -136,8 +111,6 @@ GEO_PATTERNS = [
         "West",
         "geo_title"
     ),
-
-    # ---------------- UNITED KINGDOM ----------------
 
     (
         r"\bангли\w*\b|\bбритан\w*\b|\bвеликобритани\w*\b|"
@@ -147,7 +120,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- NETHERLANDS ----------------
 
     (
         r"\bнидерланд\w*\b|\bголланд\w*\b|\bамстердам\w*\b|"
@@ -157,7 +129,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- BELGIUM / FLANDERS ----------------
 
     (
         r"\bбельги\w*\b|\bфламанд\w*\b|\bбрюссел\w*\b",
@@ -166,8 +137,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- SWITZERLAND ----------------
-
     (
         r"\bшвейцари\w*\b|\bцюрих\w*\b|\bженев\w*\b",
         "Switzerland",
@@ -175,7 +144,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- USA ----------------
 
     (
         r"\bамерик\w*\b|\bсша\b|\bнью[- ]йорк\w*\b|"
@@ -184,8 +152,6 @@ GEO_PATTERNS = [
         "West",
         "geo_title"
     ),
-
-    # ---------------- OTHER EUROPE ----------------
 
     (
         r"\bпольш\w*\b|\bваршав\w*\b|\bчех\w*\b|\bпраг\w*\b|"
@@ -196,7 +162,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- EAST GENERAL ----------------
 
     (
         r"\bвосточн\w*\b|\bдальн\w+ восток\w*\b",
@@ -205,7 +170,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- JAPAN ----------------
 
     (
         r"\bяпони\w*\b|\bяпон\w*\b|\bтокио\w*\b|"
@@ -215,8 +179,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- CHINA ----------------
-
     (
         r"\bкита\w*\b|\bкитай\w*\b|\bпекин\w*\b|"
         r"\bшанха\w*\b|\bхань\b|\bмин\b|\bтан\b",
@@ -225,7 +187,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- KOREA ----------------
 
     (
         r"\bкоре\w*\b|\bсеул\w*\b",
@@ -234,7 +195,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- INDIA ----------------
 
     (
         r"\bинд\w*\b|\bдели\b|\bбомбей\b",
@@ -243,7 +203,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- IRAN / PERSIA ----------------
 
     (
         r"\bиран\w*\b|\bперси\w*\b|\bтегеран\w*\b",
@@ -252,7 +211,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- CENTRAL ASIA ----------------
 
     (
         r"\bказахстан\w*\b|\bузбекистан\w*\b|\bсамарканд\w*\b|"
@@ -263,7 +221,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- OTHER ASIA ----------------
 
     (
         r"\bтибет\w*\b|\bнепал\w*\b|\bтаиланд\w*\b|"
@@ -274,7 +231,6 @@ GEO_PATTERNS = [
         "geo_title"
     ),
 
-    # ---------------- ANCIENT EAST / CAUCASUS ----------------
 
     (
         r"\bегип\w*\b|\bдревнеегип\w*\b|\bмумии\b|"
@@ -302,17 +258,7 @@ GEO_PATTERNS = [
     ),
 ]
 
-
-# ==========================================================
-# PERSON DICTIONARY
-# Это замена ручной проверки через Wikipedia.
-# Если география в заголовке не найдена, ищем людей.
-# ==========================================================
-
 PERSON_DICT = {
-
-    # ---------------- RUSSIA ----------------
-
     "беатриса сандомирская": ("Russia", "Russia"),
     "сандомирская": ("Russia", "Russia"),
 
@@ -459,7 +405,6 @@ PERSON_DICT = {
     "олег яхонт": ("Russia", "Russia"),
     "константин истомин": ("Russia", "Russia"),
 
-    # ---------------- WEST ----------------
 
     "гверчино": ("Italy", "West"),
     "брейгель": ("Netherlands/Flanders", "West"),
@@ -555,10 +500,6 @@ PERSON_DICT = {
 }
 
 
-# ==========================================================
-# DETECTION FUNCTIONS
-# ==========================================================
-
 def find_geo(title):
     """
     Ищет географические маркеры в названии выставки.
@@ -591,7 +532,6 @@ def find_person(title):
     text = normalize(title)
     matches = []
 
-    # Сначала длинные имена, потом короткие фамилии
     for name in sorted(PERSON_DICT.keys(), key=len, reverse=True):
         pattern = r"(?<!\w)" + re.escape(name) + r"(?!\w)"
 
@@ -605,7 +545,6 @@ def find_person(title):
                 "method": "person_curated_wikipedia_lookup"
             })
 
-    # Убираем дубликаты
     unique = []
     seen = set()
 
@@ -707,11 +646,6 @@ def choose_classification(matches):
         "confidence": confidence
     }
 
-
-# ==========================================================
-# MAIN
-# ==========================================================
-
 df = pd.read_csv(INPUT_FILE)
 
 rows = []
@@ -719,11 +653,8 @@ rows = []
 for _, row in df.iterrows():
 
     title = row.get("title", "")
-
-    # 1. Сначала ищем географию в заголовке
     geo_matches = find_geo(title)
 
-    # 2. Если география не найдена, ищем людей
     if geo_matches:
         person_matches = []
     else:
@@ -736,8 +667,6 @@ for _, row in df.iterrows():
     new_row = row.to_dict()
     new_row.update(classification)
 
-    # Если строка Unknown или классифицирована по человеку,
-    # ее лучше проверить вручную / через Wikipedia
     new_row["wikipedia_check_needed"] = (
         new_row["category_final"] == "Unknown"
         or new_row["classification_method"] == "person_curated_wikipedia_lookup"
@@ -756,9 +685,7 @@ for _, row in df.iterrows():
 
 out = pd.DataFrame(rows)
 
-# ==========================================================
-# SAVE FULL CLASSIFIED DATA
-# ==========================================================
+
 
 out.to_csv(
     OUTPUT_FILE,
@@ -767,9 +694,6 @@ out.to_csv(
 )
 
 
-# ==========================================================
-# SAVE MANUAL REVIEW TABLE
-# ==========================================================
 
 review = out[
     (out["category_final"] == "Unknown")
@@ -795,10 +719,6 @@ review[review_columns].to_csv(
 )
 
 
-# ==========================================================
-# SAVE SUMMARY TABLE
-# ==========================================================
-
 summary = (
     out
     .groupby(["period", "category_final"])
@@ -815,10 +735,6 @@ summary.to_csv(
     encoding="utf-8-sig"
 )
 
-
-# ==========================================================
-# PRINT RESULTS
-# ==========================================================
 
 print("Saved:", OUTPUT_FILE)
 print("Rows:", out.shape)

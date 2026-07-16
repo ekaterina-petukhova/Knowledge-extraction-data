@@ -8,11 +8,6 @@ OUTPUT_FILE = "final_exhibitions_clean_reclassified.csv"
 
 df = pd.read_csv(INPUT_FILE)
 
-
-# -------------------------
-# Basic cleaning
-# -------------------------
-
 def clean_text(x):
     if pd.isna(x):
         return ""
@@ -52,8 +47,6 @@ def get_analysis_text(row):
     title = clean_text(row.get("title", ""))
     description = remove_site_noise(row.get("description", ""))
 
-    # Берем не весь огромный текст, а кусок вокруг реального описания.
-    # Часто описание начинается после слов "Подробнее", "представляет выставку", "о выставке".
     markers = [
         "представляет выставку",
         "выставка посвящена",
@@ -76,10 +69,6 @@ def get_analysis_text(row):
     return (title + ". " + description).lower()
 
 
-# -------------------------
-# Foreign / Russian institution vocab
-# -------------------------
-
 RUSSIAN_INSTITUTION_WORDS = [
     "третьяков", "пушкин", "гмии", "российск", "русск", "москва", "московск",
     "санкт-петербург", "петербург", "эрмитаж", "русский музей", "гараж",
@@ -90,8 +79,6 @@ RUSSIAN_INSTITUTION_WORDS = [
     "государственный музей", "государственная галерея",
 ]
 
-# Иностранные институции / города / страны.
-# Это именно сигналы foreign institution, а не просто язык сайта.
 FOREIGN_PARTNER_KEYWORDS = {
     "France": [
         "fondation louis vuitton", "louis vuitton", "лувр", "louvre",
@@ -251,7 +238,6 @@ def find_foreign_collaboration(row):
 
         partner = extract_partner_from_sentence(s)
 
-        # Если извлеченный partner явно русский — не считаем foreign.
         if partner and is_russian_partner(partner):
             continue
 
@@ -278,10 +264,6 @@ def find_foreign_collaboration(row):
         "foreign_context_clean": ""
     })
 
-
-# -------------------------
-# Orientation labels, stricter
-# -------------------------
 
 WEST_TOPIC_KEYWORDS = [
     "франц", "париж", "лувр", "louvre", "итал", "рим", "венеци", "герман",
@@ -349,7 +331,6 @@ def pivot_score_clean(row):
     if contains_any(text, INTERNAL_TOPIC_KEYWORDS):
         score += 1
 
-    # Реальная foreign collaboration с Западом/Востоком добавляет отдельный сигнал.
     foreign_status = row.get("foreign_collaboration_clean", "no")
     foreign_countries = clean_text(row.get("foreign_countries_clean", ""))
 
@@ -361,10 +342,6 @@ def pivot_score_clean(row):
 
     return score
 
-
-# -------------------------
-# Run
-# -------------------------
 
 print("Cleaning descriptions and reclassifying foreign collaborations...")
 

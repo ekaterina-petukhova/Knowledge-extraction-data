@@ -1,11 +1,9 @@
 import pandas as pd
 
-# 1. Читаем файл, указывая, что разделитель — запятая
-# Мы игнорируем старый заголовок и задаем имена колонок принудительно
+
 cols = ['museum', 'title', 'date_range', 'year', 'period', 'url', 'text_to_analyze', 'category']
 df = pd.read_csv('final_analysis_results.csv', names=cols, header=0)
 
-# 2. Ваш список "красных" выставок
 red_titles = [
     "Карл Брюллов. Рим – Москва – Петербург",
     "Илья Машков. Авангард. Китч. Классика",
@@ -33,9 +31,8 @@ red_titles = [
     "Война и мир в творчестве Георгия и Ореста Верейских"
 ]
 
-# 3. Исправляем категорию
+
 df.loc[df['title'].isin(red_titles), 'category'] = 'национальное российское искусство'
 
-# 4. Сохраняем
 df.to_csv('final_analysis_fixed.csv', index=False)
 print("Успех! Файл 'final_analysis_fixed.csv' готов.")
